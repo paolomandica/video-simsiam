@@ -2,6 +2,7 @@ import resnet
 from torchvision import transforms
 from torch.nn import functional as F
 from torch import nn
+from torchvision import models
 from collections import defaultdict, deque
 import datetime
 import time
@@ -208,6 +209,10 @@ def mkdir(path):
 #################################################################################
 # Network Utils
 #################################################################################
+
+
+def get_ResNet():
+    return models.__dict__['resnet50']
 
 
 def partial_load(pretrained_dict, model, skip_keys=[]):

@@ -23,34 +23,29 @@ def main(args, vis):
     print('Available CUDA devices: ', gpus_count)
     print('Current CUDA device: ', torch.cuda.current_device())
 
-    model = CRW(args, vis=vis).to(args.device)
+    model = SimSiam(utils.get_ResNet()).to(args.device)
     args.mapScale = test_utils.infer_downscale(model)
 
-    args.use_lab = args.model_type == 'uvc'
     dataset = (
         vos.VOSDataset if not 'jhmdb' in args.filelist else jhmdb.JhmdbSet)(args)
-    val_loader = torch.utils.data.DataLoader(dataset,
-                                             batch_size=int(args.batchSize), shuffle=False, num_workers=args.workers, pin_memory=True)
+    val_loader = torch.utils.data.DataLoader(dataset, batch_size=int(
+        args.batchSize), shuffle=False, num_workers=args.workers, pin_memory=True)
 
     # cudnn.benchmark = False
-    print('Total params: %.2fM' % (sum(p.numel()
-                                       for p in model.parameters())/1000000.0))
+    print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
 
     # Load checkpoint.
     if os.path.isfile(args.resume):
         print('==> Resuming from checkpoint..')
         checkpoint = torch.load(args.resume)
 
-        if args.model_type == 'scratch':
-            state = {}
-            for k, v in checkpoint['model'].items():
-                if 'conv1.1.weight' in k or 'conv2.1.weight' in k:
-                    state[k.replace('.1.weight', '.weight')] = v
-                else:
-                    state[k] = v
-            utils.partial_load(state, model, skip_keys=['head'])
-        else:
-            utils.partial_load(checkpoint['model'], model, skip_keys=['head'])
+        state = {}
+        for k, v in checkpoint['model'].items():
+            if 'conv1.1.weight' in k or 'conv2.1.weight' in k:
+                state[k.replace('.1.weight', '.weight')] = v
+            else:
+                state[k] = v
+        utils.partial_load(state, model, skip_keys=['head'])
 
         del checkpoint
 

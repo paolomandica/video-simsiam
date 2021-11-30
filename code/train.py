@@ -10,7 +10,6 @@ import torch.utils.data
 from torch.utils.data.dataloader import default_collate
 from torch import nn
 import torchvision
-import torchvision.models as models
 
 import data
 from data.kinetics import Kinetics400
@@ -194,7 +193,7 @@ def main(args):
     vis = utils.visualize.Visualize(args) if args.visualize else None
 
     # Model
-    model = SimSiam(models.__dict__['resnet50']).to(device)
+    model = SimSiam(utils.get_ResNet()).to(device)
 
     # Optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)

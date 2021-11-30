@@ -12,11 +12,6 @@ dataset="/data_volume/data/davis_val/"
 # Delete Contents of Results Directory
 rm -rf ../results/*
 
-# # Pretrained Model Paths
-# pretrained_checkpoint="../pretrained.pth"
-# pretrained_savepath="../results/pretrained/"
-# pretrained_outpath="../results/pretrained_converted/"
-
 # Run Evaluation
 python test.py --filelist $vallist --model-type scratch \
 --resume $checkpoint --save-path $savepath \
