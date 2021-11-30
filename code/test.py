@@ -9,10 +9,9 @@ import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 
-from model import CRW
+from model import SimSiam
 
-from data import vos, jhmdb
-from data.video import SingleVideoDataset
+from data import vos
 
 import utils
 import utils.test_utils as test_utils
@@ -24,12 +23,6 @@ def main(args, vis):
     print('Current CUDA device: ', torch.cuda.current_device())
 
     model = SimSiam(utils.get_ResNet()).to(args.device)
-    args.mapScale = test_utils.infer_downscale(model)
-
-    dataset = (
-        vos.VOSDataset if not 'jhmdb' in args.filelist else jhmdb.JhmdbSet)(args)
-    val_loader = torch.utils.data.DataLoader(dataset, batch_size=int(
-        args.batchSize), shuffle=False, num_workers=args.workers, pin_memory=True)
 
     # cudnn.benchmark = False
     print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
@@ -45,12 +38,20 @@ def main(args, vis):
                 state[k.replace('.1.weight', '.weight')] = v
             else:
                 state[k] = v
-        utils.partial_load(state, model, skip_keys=['head'])
+
+        utils.partial_load(state, model, skip_keys=['fc', 'predictor'])
+        model.encoder = nn.Sequential(*list(model.encoder.children())[:-2])
 
         del checkpoint
 
     model.eval()
     model = model.to(args.device)
+
+    args.mapScale = test_utils.infer_downscale(model.encoder)
+    print(args.mapScale)
+    dataset = vos.VOSDataset(args)
+    val_loader = torch.utils.data.DataLoader(dataset, batch_size=int(
+        args.batchSize), shuffle=False, num_workers=args.workers, pin_memory=True)
 
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)
@@ -79,10 +80,11 @@ def test(loader, model, args):
             bsize = 5   # minibatch size for computing features
             feats = []
             for b in range(0, imgs.shape[1], bsize):
-                feat = model.encoder(
-                    imgs[:, b:b+bsize].transpose(1, 2).to(args.device))
+                encoder_input = imgs[:, b:b+bsize].flatten(0,1)
+                feat = model.encoder(encoder_input.to(args.device))
+                feat = feat.transpose(0,1).unsqueeze(0)
                 feats.append(feat.cpu())
-            feats = torch.cat(feats, dim=2).squeeze(1)
+            feats = torch.cat(feats, dim=2)
 
             if not args.no_l2:
                 feats = torch.nn.functional.normalize(feats, dim=1)
@@ -162,13 +164,6 @@ def test(loader, model, args):
                 cur_img = imgs_orig[0, t +
                                     n_context].permute(1, 2, 0).cpu().numpy() * 255
                 _maps = []
-
-                if 'jhmdb' in args.filelist.lower():
-                    coords, pred_sharp = test_utils.process_pose(pred, lbl_map)
-                    keypts.append(coords)
-                    pose_map = utils.vis_pose(np.array(cur_img).copy(
-                    ), coords.numpy() * args.mapScale[..., None])
-                    _maps += [pose_map]
 
                 if 'VIP' in args.filelist:
                     outpath = os.path.join(
