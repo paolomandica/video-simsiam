@@ -1,0 +1,13 @@
+torchvision
+imageio
+matplotlib
+scikit-image
+scikit-learn
+wandb
+visdom
+av
+numpy
+scipy
+setuptools
+tqdm
+joblib
