@@ -1,12 +1,6 @@
 FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-devel
 
-# Set permission
-ARG USER_ID=1038
-ARG GROUP_ID=1040
 ENV USERNAME=francolu
-
-RUN addgroup --gid $GROUP_ID $USERNAME
-RUN adduser --home /home/$USERNAME --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USERNAME
 
 # Set the working directory and user
 WORKDIR /home/$USERNAME
@@ -21,7 +15,14 @@ RUN apt-get install -y ffmpeg libsm6 libxext6 build-essential cmake curl g++ zip
 
 # Clone and install evaluation repo
 RUN git clone https://github.com/davisvideochallenge/davis2017-evaluation.git
+RUN pip install imageio
 RUN python ./davis2017-evaluation/setup.py install
+
+# Set permission
+# ARG USER_ID=1038
+# ARG GROUP_ID=1040
+# RUN addgroup --gid $GROUP_ID $USERNAME
+# RUN adduser --home /home/$USERNAME --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID $USERNAME
 
 # Install requirements
 # RUN pip install --ignore-installed -r https://raw.githubusercontent.com/paolomandica/sapienza-video-contrastive/main/requirements.txt
