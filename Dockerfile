@@ -16,9 +16,8 @@ ENV TZ=Europe/Rome
 RUN ln -sf /usr/share/zoneinfo/Europe/Rome /etc/localtime
 
 # Clone the repo
-RUN apt-get update && apt-get install git nano tree screen wget -y
-RUN apt-get install ffmpeg libsm6 libxext6 build-essential \
-    cmake curl g++ zip unzip ca-certificates
+RUN apt-get update && apt-get install -y git nano tree screen wget
+RUN apt-get install -y ffmpeg libsm6 libxext6 build-essential cmake curl g++ zip unzip ca-certificates
 
 # Clone and install evaluation repo
 RUN git clone https://github.com/davisvideochallenge/davis2017-evaluation.git
