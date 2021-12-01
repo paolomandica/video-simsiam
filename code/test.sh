@@ -1,5 +1,5 @@
 # Checkpoint to Evaluate
-checkpoint="./checkpoints/simsiam/model_0.pth"
+checkpoint="./checkpoints/simsiam/model_1.pth"
 
 # Results Output Directories
 savepath="../results/masks/"

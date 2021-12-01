@@ -32,15 +32,9 @@ def main(args, vis):
         print('==> Resuming from checkpoint..')
         checkpoint = torch.load(args.resume)
 
-        state = {}
-        for k, v in checkpoint['model'].items():
-            if 'conv1.1.weight' in k or 'conv2.1.weight' in k:
-                state[k.replace('.1.weight', '.weight')] = v
-            else:
-                state[k] = v
-
-        utils.partial_load(state, model, skip_keys=['fc', 'predictor'])
-        model.encoder = nn.Sequential(*list(model.encoder.children())[:-2])
+        state = {k: v for k,v in checkpoint['model'].items()}
+        utils.partial_load(state, model)
+        model.encoder = nn.Sequential(*list(model.encoder.children())[:-4])
 
         del checkpoint
 

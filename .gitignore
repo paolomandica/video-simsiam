@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=vscode,python,jupyternotebooks
 
 ### folders ###
+results
 
 ### files ###
 *.zip
