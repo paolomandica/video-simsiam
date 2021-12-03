@@ -11,7 +11,6 @@ import pdb
 import os
 import random
 
-from .superpixels import *
 
 
 class Kinetics400(VisionDataset):
@@ -55,12 +54,7 @@ class Kinetics400(VisionDataset):
         extensions=("mp4",),
         transform=None,
         cached=None,
-        _precomputed_metadata=None,
-        sp_method=None,
-        num_components=None,
-        prob=None,
-        randomise_superpixels=None,
-        randomise_superpixels_range=None
+        _precomputed_metadata=None
     ):
         super(Kinetics400, self).__init__(root)
         extensions = extensions

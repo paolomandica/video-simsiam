@@ -4,6 +4,7 @@
 
 ### folders ###
 results
+wandb
 
 ### files ###
 *.zip

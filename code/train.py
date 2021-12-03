@@ -13,7 +13,6 @@ import torchvision
 
 import data
 from data.kinetics import Kinetics400
-from data.video import VideoList
 from torchvision.datasets.samplers.clip_sampler import RandomClipSampler, UniformClipSampler
 
 import utils
@@ -31,7 +30,7 @@ torch.autograd.set_detect_anomaly(True)
 
 
 def train_one_epoch(model, optimizer, lr_scheduler, data_loader, device,
-                    epoch, print_freq, vis=None, checkpoint_fn=None, prob=None):
+                    epoch, print_freq, vis=None, checkpoint_fn=None):
 
     criterion = nn.CosineSimilarity(dim=1).cuda()
 
@@ -134,12 +133,7 @@ def main(args):
             extensions=('mp4'),
             frame_rate=args.frame_skip,
             # cached=cached,
-            _precomputed_metadata=cached,
-            sp_method=args.sp_method,
-            num_components=args.num_sp,
-            prob=args.prob,
-            randomise_superpixels=args.randomise_superpixels,
-            randomise_superpixels_range=args.randomise_superpixels_range
+            _precomputed_metadata=cached
         )
 
     if args.cache_dataset and os.path.exists(cache_path):
@@ -186,8 +180,8 @@ def main(args):
         sampler=train_sampler, num_workers=args.workers//2,
         pin_memory=True, collate_fn=collate_fn)
 
-    print("Set Compactness at:", args.compactness)
-    data_loader.dataset.set_compactness(args.compactness)
+    # print("Set Compactness at:", args.compactness)
+    # data_loader.dataset.set_compactness(args.compactness)
 
     # Visualisation
     vis = utils.visualize.Visualize(args) if args.visualize else None
@@ -246,8 +240,7 @@ def main(args):
     for epoch in range(args.start_epoch, args.epochs):
         train_one_epoch(model, optimizer, lr_scheduler, data_loader,
                         device, epoch, args.print_freq,
-                        vis=vis, checkpoint_fn=save_model_checkpoint,
-                        prob=args.prob)
+                        vis=vis, checkpoint_fn=save_model_checkpoint)
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))

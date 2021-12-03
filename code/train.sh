@@ -14,10 +14,9 @@ cache_path_sample="/data_volume/data/cached_data/kinetics_sample.pt"
 
 python -W ignore train.py --data-path $path_to_kinetics \
 --cache-dataset --cache-path $cache_path \
---frame-aug grid --dropout 0.1 --clip-len 8 --temp 0.05 \
---model-type "scratch" --workers 40 --batch-size 40 --lr 0.05 \
+--clip-len 8 --workers 40 --batch-size 40 --lr 0.05 \
 --epochs 100 --data-parallel --visualize \
---output-dir "./checkpoints/simsiam/"
+--output-dir "./checkpoints/simsiam_noaug/"
 # --visualize --port 8094 
 # --partial-reload "../pretrained.pth"
 # --resume "./checkpoints/randomise_sp_unnorm/checkpoint.pth"
