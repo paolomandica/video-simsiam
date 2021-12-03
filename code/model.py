@@ -4,7 +4,7 @@ import pdb
 
 
 class SimSiam(nn.Module):
-    def __init__(self, base_encoder, dim=2048, pred_dim=512):
+    def __init__(self, base_encoder, dim=2048, pred_dim=512, aggr_hidden=2048, aggr_layers=1, aggr_directions=1):
         super(SimSiam, self).__init__()
 
         self.dim = dim
@@ -23,6 +23,15 @@ class SimSiam(nn.Module):
                                         nn.BatchNorm1d(dim, affine=False))  # output layer
         self.encoder.fc[6].bias.requires_grad = False  # hack: not use bias as it is followed by BN
 
+        #Initialize aggregator
+        self.aggr_hidden = aggr_hidden
+        self.aggr_layers = aggr_layers
+        self.aggr_directions = aggr_directions
+        bidirectional = True if aggr_directions==2 else False
+        
+        self.lstm = nn.LSTM(dim, aggr_hidden, aggr_layers, batch_first=True, bidirectional=bidirectional)
+        self.lstm_linear = nn.Linear(aggr_hidden, dim)
+
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
                                        nn.BatchNorm1d(pred_dim),
@@ -33,22 +42,32 @@ class SimSiam(nn.Module):
 
         B, T, C, H, W = x.shape
 
+
+        ############## FRAMES ENCODING ##############
         feats = self.encoder(x.flatten(0, 1)).reshape(B, T, self.dim)
 
         z1 = feats[:, :T//2, :]
         z2 = feats[:, T//2:, :]
 
-        # # TODO: split into 2 clips after encoder passage
-        # z1 = self.encoder(clip1.flatten(0,1)).reshape(B, T//2, self.dim)
-        # z2 = self.encoder(clip2.flatten(0,1)).reshape(B, T//2, self.dim)
 
-        # Clip Aggregation
+        ############## FRAMES AGGREGATION ##############
+
+        ### MEAN ###
         s1 = z1.mean(1)
         s2 = z2.mean(1)
 
-        # TODO: Consider the following modifications
-        # 1. aggregating the outputs after the forward in the predictor
-        # 2. using an MLP to aggregate frames embeddings
+        ### LSTM ###
+        # h_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden) # num_layers*num_directions, batch, hidden_size
+        # c_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden) 
+        # hidden = (h_t, c_t)
+
+        # z1 = self.lstm(z1, hidden)
+        # s1 = self.lstm_linear(z1)
+        # z2 = self.lstm(z2, hidden)
+        # s2 = self.lstm_linear(z2)
+
+        
+        ############## PREDICTOR ##############
 
         p1 = self.predictor(s1)
         p2 = self.predictor(s2)
