@@ -40,24 +40,20 @@ def get_frame_transform(img_size):
         torchvision.transforms.RandomHorizontalFlip(),
     ]
 
-    if np.random.rand() <= 0.8:
-        tt += [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)]
+    # if np.random.rand() <= 0.8:
+    #     tt += [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)]
 
-    tt += [transforms.RandomGrayscale(p=0.2)]
+    # tt += [transforms.RandomGrayscale(p=0.2)]
 
-    if np.random.rand() <= 0.5:
-        tt += [transforms.GaussianBlur(7)]
+    # if np.random.rand() <= 0.5:
+    #     tt += [transforms.GaussianBlur(7)]
 
     return tt
 
 
 def get_train_transforms(args):
     norm_size = torchvision.transforms.Resize((args.img_size, args.img_size))
-
     frame_transform = get_frame_transform(args.img_size)
-
     transform = frame_transform + NORM
-
     train_transform = MapTransform(torchvision.transforms.Compose(transform))
-
     return train_transform
