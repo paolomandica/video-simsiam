@@ -170,6 +170,8 @@ def test_args():
     parser.add_argument('--finetune', default=0, type=int, help='')
     parser.add_argument('--pca-vis', default=False, action='store_true')
 
+    parser.add_argument('--res-layer', default=4, type=int)
+
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_id

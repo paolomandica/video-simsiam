@@ -34,7 +34,8 @@ def main(args, vis):
 
         state = {k: v for k,v in checkpoint['model'].items()}
         utils.partial_load(state, model)
-        model.encoder = nn.Sequential(*list(model.encoder.children())[:-4])
+        layer = args.res_layer - 7
+        model.encoder = nn.Sequential(*list(model.encoder.children())[:layer])
 
         del checkpoint
 
