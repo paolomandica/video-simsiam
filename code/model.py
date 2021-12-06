@@ -2,12 +2,16 @@ import torch
 import torch.nn as nn
 import pdb
 
+from copy import deepcopy
+
 
 class SimSiam(nn.Module):
-    def __init__(self, base_encoder, dim=2048, pred_dim=512, aggr_hidden=2048, aggr_layers=1, aggr_directions=1):
+    def __init__(self, base_encoder, dim=2048, pred_dim=512, aggr_hidden=2048, 
+                aggr_layers=1, aggr_directions=1, device='cuda'):
         super(SimSiam, self).__init__()
 
         self.dim = dim
+        self.device = device
 
         self.encoder = base_encoder(num_classes=dim, zero_init_residual=True)
 
@@ -53,20 +57,22 @@ class SimSiam(nn.Module):
         ############## FRAMES AGGREGATION ##############
 
         ### MEAN ###
-        s1 = z1.mean(1)
-        s2 = z2.mean(1)
+        # s1 = z1.mean(1)
+        # s2 = z2.mean(1)
 
         ### LSTM ###
-        # h_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden) # num_layers*num_directions, batch, hidden_size
-        # c_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden) 
-        # hidden = (h_t, c_t)
+        h_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden) # num_layers*num_directions, batch, hidden_size
+        c_t = torch.zeros(self.aggr_layers*self.aggr_directions, B, self.aggr_hidden)
 
-        # z1 = self.lstm(z1, hidden)
-        # s1 = self.lstm_linear(z1)
-        # z2 = self.lstm(z2, hidden)
-        # s2 = self.lstm_linear(z2)
+        hidden_z1 = (h_t.to(self.device), c_t.to(self.device))
+        hidden_z2 = deepcopy(hidden_z1)
 
-        
+        z1, hidden_z1 = self.lstm(z1, hidden_z1)
+        z2, hidden_z2 = self.lstm(z2, hidden_z2)
+
+        s1 = self.lstm_linear(hidden_z1[0].squeeze(0))
+        s2 = self.lstm_linear(hidden_z2[0].squeeze(0))
+
         ############## PREDICTOR ##############
 
         p1 = self.predictor(s1)

@@ -40,13 +40,13 @@ def get_frame_transform(img_size):
         torchvision.transforms.RandomHorizontalFlip(),
     ]
 
-    # if np.random.rand() <= 0.8:
-    #     tt += [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)]
+    if np.random.rand() <= 0.8:
+        tt += [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)]
 
-    # tt += [transforms.RandomGrayscale(p=0.2)]
+    tt += [transforms.RandomGrayscale(p=0.2)]
 
-    # if np.random.rand() <= 0.5:
-    #     tt += [transforms.GaussianBlur(7)]
+    if np.random.rand() <= 0.5:
+        tt += [transforms.GaussianBlur(7)]
 
     return tt
 

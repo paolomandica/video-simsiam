@@ -187,7 +187,7 @@ def main(args):
     vis = utils.visualize.Visualize(args) if args.visualize else None
 
     # Model
-    model = SimSiam(utils.get_ResNet()).to(device)
+    model = SimSiam(utils.get_ResNet(), device=device).to(device)
 
     # Optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)
