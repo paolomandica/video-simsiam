@@ -35,7 +35,7 @@ class SimSiam(nn.Module):
         self.encoder.fc[6].bias.requires_grad = False  # hack: not use bias as it is followed by BN
 
         # Initialize aggregator
-        self.tcn = tcn.TemporalConvNet(channels, [1], kernel_size=dim)
+        self.tcn = tcn.TemporalConvNet(n_frames//2, [1], kernel_size=dim)
 
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
@@ -60,12 +60,12 @@ class SimSiam(nn.Module):
         # s2 = z2.mean(1)
 
         ###### TCN ######
-        s1 = self.tcn(z1)
-        s2 = self.tcn(z2)
+        s1 = self.tcn(z1).squeeze(1)
+        s2 = self.tcn(z2).squeeze(1)
 
         ############## PREDICTOR ##############
 
-        p1 = self.predictor(s1.squeeze(1))
-        p2 = self.predictor(s2.squeeze(1))
+        p1 = self.predictor(s1)
+        p2 = self.predictor(s2)
 
         return p1, p2, s1.detach(), s2.detach()
