@@ -74,5 +74,5 @@ def convert_dir(i):
         im.save(outname, format='PNG')
 
 import multiprocessing as mp
-pool = mp.Pool(10)
+pool = mp.Pool(20)
 results = pool.map(convert_dir, range(len(jpglist)))
