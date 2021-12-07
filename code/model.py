@@ -4,6 +4,8 @@ import pdb
 
 from copy import deepcopy
 
+# import individual_TF
+
 
 class SimSiam(nn.Module):
     def __init__(self, base_encoder, dim=2048, pred_dim=512, aggr_hidden=2048, 
@@ -36,11 +38,32 @@ class SimSiam(nn.Module):
         self.lstm = nn.LSTM(dim, aggr_hidden, aggr_layers, batch_first=True, bidirectional=bidirectional)
         self.lstm_linear = nn.Linear(aggr_hidden, dim)
 
+
+        # inp_enc_size = 
+        # inp_dec_size = 
+        # out_size = 
+        # tf_layers = 
+        # tf_emb_size = 
+        # tf_fc = 2048
+        # tf_heads = 
+        # tf_dropout = 
+        # self.aggr=individual_TF.IndividualTF(2, 3, 3, N=tf_layers, d_model=tf_emb_size, d_ff=tf_fc, h=tf_heads, dropout=tf_dropout, mean=[0,0], std=[0,0]).to(self.device)
+
+        # config= BertConfig(vocab_size=30522, hidden_size=768, num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072, hidden_act='relu', hidden_dropout_prob=0.1, attention_probs_dropout_prob=0.1, max_position_embeddings=512, type_vocab_size=2, initializer_range=0.02, layer_norm_eps=1e-12)
+        # model = BertModel(config).to(device)
+
+        # a=NewEmbed(3, 768).to(device)
+        # model.set_input_embeddings(a)
+        # generator=GeneratorTS(768,2).to(device)
+
+
+
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
                                        nn.BatchNorm1d(pred_dim),
                                        nn.ReLU(inplace=True),  # hidden layer
                                        nn.Linear(pred_dim, dim))  # output layer
+
 
     def forward(self, x):
 
