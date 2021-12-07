@@ -73,6 +73,9 @@ def train_args():
                         help='kinetics: fps | others: skip between frames')
     parser.add_argument('--img-size', default=256, type=int)
 
+    # Augmentations
+    parser.add_argument('--color-aug', default=True, action='store_false')
+
     parser.add_argument('--port', default=8095, type=int, help='visdom port')
     parser.add_argument('--server', default='localhost',
                         type=str, help='visdom server')

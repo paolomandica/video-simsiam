@@ -1,5 +1,5 @@
 # Checkpoint to Evaluate
-checkpoint="./checkpoints/simsiam_noaug/model_4.pth"
+checkpoint="./checkpoints/simsiam_lstm/model_0.pth"
 
 # ResNet layer to use
 res_layer=4
