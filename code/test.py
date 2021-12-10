@@ -32,7 +32,7 @@ def main(args, vis):
         print('==> Resuming from checkpoint..')
         checkpoint = torch.load(args.resume)
 
-        state = {k: v for k,v in checkpoint['model'].items()}
+        state = {k: v for k, v in checkpoint['model'].items() if 'tcn' not in k}
         utils.partial_load(state, model)
         layer = args.res_layer - 7
         model.encoder = nn.Sequential(*list(model.encoder.children())[:layer])
@@ -75,9 +75,9 @@ def test(loader, model, args):
             bsize = 5   # minibatch size for computing features
             feats = []
             for b in range(0, imgs.shape[1], bsize):
-                encoder_input = imgs[:, b:b+bsize].flatten(0,1)
+                encoder_input = imgs[:, b:b+bsize].flatten(0, 1)
                 feat = model.encoder(encoder_input.to(args.device))
-                feat = feat.transpose(0,1).unsqueeze(0)
+                feat = feat.transpose(0, 1).unsqueeze(0)
                 feats.append(feat.cpu())
             feats = torch.cat(feats, dim=2)
 

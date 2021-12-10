@@ -17,7 +17,7 @@ from torchvision.datasets.samplers.clip_sampler import RandomClipSampler, Unifor
 
 import utils
 
-from model import SimSiam
+from models.model import SimSiam
 
 torch.autograd.set_detect_anomaly(True)
 
@@ -128,7 +128,7 @@ def main(args):
         return Kinetics400(
             traindir if is_train else valdir,
             frames_per_clip=args.clip_len,
-            step_between_clips=1,
+            step_between_clips=args.clips_step,
             transform=transform_train,
             extensions=('mp4'),
             frame_rate=args.frame_skip,
@@ -187,7 +187,8 @@ def main(args):
     vis = utils.visualize.Visualize(args) if args.visualize else None
 
     # Model
-    model = SimSiam(utils.get_ResNet(), device=device, n_frames=args.clip_len).to(device)
+    model = SimSiam(utils.get_ResNet(), aggregator=args.aggregator,
+                    device=device, n_frames=args.clip_len).to(device)
 
     # Optimizer
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=0.0001)

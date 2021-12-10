@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import pdb
-import tcn
+from . import tcn
 
 from copy import deepcopy
 
@@ -16,7 +16,8 @@ class TCN(nn.Module):
 
 
 class SimSiam(nn.Module):
-    def __init__(self, base_encoder, dim=2048, pred_dim=512, device='cuda', n_frames=4):
+    def __init__(self, base_encoder, aggregator, dim=2048,
+                 pred_dim=512, device='cuda', n_frames=4):
         super(SimSiam, self).__init__()
 
         self.dim = dim
@@ -37,17 +38,21 @@ class SimSiam(nn.Module):
         self.encoder.fc[6].bias.requires_grad = False  # hack: not use bias as it is followed by BN
 
         # Initialize aggregator
-        self.tcn = tcn.TemporalConvNet(n_frames//2, [1], kernel_size=dim)
+        self.aggregate = None
+        if aggregator == "mean":
+            self.aggregate = lambda x: x.mean(1)
+        elif aggregator == "tcn":
+            self.tcn = tcn.TemporalConvNet(n_frames//2, [1], kernel_size=dim)
+            self.aggregate = lambda x: self.tcn(x).squeeze(1)
 
-
-        # inp_enc_size = 
-        # inp_dec_size = 
-        # out_size = 
-        # tf_layers = 
-        # tf_emb_size = 
+        # inp_enc_size =
+        # inp_dec_size =
+        # out_size =
+        # tf_layers =
+        # tf_emb_size =
         # tf_fc = 2048
-        # tf_heads = 
-        # tf_dropout = 
+        # tf_heads =
+        # tf_dropout =
         # self.aggr=individual_TF.IndividualTF(2, 3, 3, N=tf_layers, d_model=tf_emb_size, d_ff=tf_fc, h=tf_heads, dropout=tf_dropout, mean=[0,0], std=[0,0]).to(self.device)
 
         # config= BertConfig(vocab_size=30522, hidden_size=768, num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072, hidden_act='relu', hidden_dropout_prob=0.1, attention_probs_dropout_prob=0.1, max_position_embeddings=512, type_vocab_size=2, initializer_range=0.02, layer_norm_eps=1e-12)
@@ -57,14 +62,11 @@ class SimSiam(nn.Module):
         # model.set_input_embeddings(a)
         # generator=GeneratorTS(768,2).to(device)
 
-
-
         # build a 2-layer predictor
         self.predictor = nn.Sequential(nn.Linear(dim, pred_dim, bias=False),
                                        nn.BatchNorm1d(pred_dim),
                                        nn.ReLU(inplace=True),  # hidden layer
                                        nn.Linear(pred_dim, dim))  # output layer
-
 
     def forward(self, x):
 
@@ -78,13 +80,8 @@ class SimSiam(nn.Module):
 
         ############## FRAMES AGGREGATION ##############
 
-        ###### MEAN ######
-        # s1 = z1.mean(1)
-        # s2 = z2.mean(1)
-
-        ###### TCN ######
-        s1 = self.tcn(z1).squeeze(1)
-        s2 = self.tcn(z2).squeeze(1)
+        s1 = self.aggregate(z1)
+        s2 = self.aggregate(z2)
 
         ############## PREDICTOR ##############
 
