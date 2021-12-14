@@ -328,12 +328,11 @@ def matrix_cosine_similarity(x1, x2):
     # compute matrix multiplication and remove diagonal
     mat_sim = torch.einsum('bnc,bmc->bnm', x1, x2)
     device = 'cuda:' + str(mat_sim.get_device())
-    mat_sim_no_diag = mat_sim - torch.eye(N, N).to(device)
+    # mat_sim_no_diag = mat_sim - torch.eye(N, N).to(device)
 
-    # compute loss
-    loss = mat_sim_no_diag.sum(-1).sum(-1) / (N*(N-1))
-
-    return loss.mean()
+    # compute similarity
+    sim = mat_sim.sum(-1).sum(-1) / (N*(N-1))
+    return sim.mean()
 
 #########################################################
 # Misc
