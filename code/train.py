@@ -51,7 +51,9 @@ def train_one_epoch(model, optimizer, lr_scheduler, data_loader, device,
         start_time = time.time()
 
         p1, p2, z1, z2 = model(video.to(device))
-        loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
+        loss = -(utils.matrix_cosine_similarity(p1, z2) +
+                 utils.matrix_cosine_similarity(p2, z1)) * 0.5
+        # loss = -(criterion(p1, z2).mean() + criterion(p2, z1).mean()) * 0.5
 
         if vis is not None:
             vis.log(dict(loss=loss.item()))
@@ -128,7 +130,7 @@ def main(args):
         return Kinetics400(
             traindir if is_train else valdir,
             frames_per_clip=args.clip_len,
-            step_between_clips=1,
+            step_between_clips=args.clips_step,
             transform=transform_train,
             extensions=('mp4'),
             frame_rate=args.frame_skip,

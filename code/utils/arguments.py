@@ -17,7 +17,7 @@ def common_args(parser):
 
 
 def train_args():
-    parser = argparse.ArgumentParser(description='Video-SimSiam Training')
+    parser = argparse.ArgumentParser(description='VFS Training')
 
     parser.add_argument('--name', default='', type=str, help='')
     parser.add_argument('--data-path', default='/data_volume/data/kinetics/',
@@ -25,10 +25,6 @@ def train_args():
     parser.add_argument('--cache-path', type=str, default='/data_volume/data/cached_data/kinetics.pt',
                         help="filepath of the cached dataset")
     parser.add_argument('--device', default='cuda', help='device')
-    parser.add_argument('--clip-len', default=8, type=int, metavar='N',
-                        help='number of frames per clip')
-    parser.add_argument('--clips-per-video', default=5, type=int, metavar='N',
-                        help='maximum number of clips per video to consider')
     parser.add_argument('-b', '--batch-size', default=8, type=int)
     parser.add_argument('--epochs', default=25, type=int, metavar='N',
                         help='number of total epochs to run')
@@ -69,12 +65,17 @@ def train_args():
     parser.add_argument("--fast-test", dest="fast_test",
                         help="", action="store_true", )
 
+    # Augmentations
+    parser.add_argument('--color-aug', default=False, action='store_true')
+    parser.add_argument('--clip-len', default=8, type=int, metavar='N',
+                        help='number of frames per clip')
+    parser.add_argument('--clips-per-video', default=5, type=int, metavar='N',
+                        help='maximum number of clips per video to consider')
+    parser.add_argument('--clips-step', default=1, type=int,
+                        help='step between clips')
     parser.add_argument('--frame-skip', default=8, type=int,
                         help='kinetics: fps | others: skip between frames')
     parser.add_argument('--img-size', default=256, type=int)
-
-    # Augmentations
-    parser.add_argument('--color-aug', default=True, action='store_false')
 
     parser.add_argument('--port', default=8095, type=int, help='visdom port')
     parser.add_argument('--server', default='localhost',
@@ -95,7 +96,8 @@ def train_args():
 
     if args.output_dir == 'auto':
         keys = {
-            'name': '', 'clip_len': 'len', 'optim': 'optim', 'lr': 'lr'
+            'name': '', 'clip_len': 'len', 'optim': 'optim', 'lr': 'lr',
+            'frame_skip': 'f_skip', 'clips_step': 'step'
         }
         name = '-'.join(["%s%s" % (keys[k], getattr(args, k) if not isinstance(getattr(
             args, k), list) else '-'.join([str(s) for s in getattr(args, k)])) for k in keys])
