@@ -331,7 +331,7 @@ def matrix_cosine_similarity(x1, x2):
     # mat_sim_no_diag = mat_sim - torch.eye(N, N).to(device)
 
     # compute similarity
-    sim = mat_sim.sum(-1).sum(-1) / (N*(N-1))
+    sim = mat_sim.mean(-1).mean(-1)
     return sim.mean()
 
 #########################################################

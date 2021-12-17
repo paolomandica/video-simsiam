@@ -97,7 +97,7 @@ def train_args():
     if args.output_dir == 'auto':
         keys = {
             'clip_len': 'len', 'optim': 'optim', 'lr': 'lr',
-            'frame_skip': 'f_skip', 'clips_step': 'step'
+            'frame_skip': 'f_skip', 'clips_step': 'step', 'clips_per_video': 'clips'
         }
         name = '-'.join(["%s%s" % (keys[k], getattr(args, k) if not isinstance(getattr(
             args, k), list) else '-'.join([str(s) for s in getattr(args, k)])) for k in keys])

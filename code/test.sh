@@ -1,5 +1,5 @@
 # Checkpoint to Evaluate
-checkpoint="./checkpoints/simsiam_lstm/model_0.pth"
+checkpoint="./checkpoints/vfs_len8-optimadam-lr0.05-f_skip32-step256-clips1/model_11.pth"
 
 # ResNet layer to use
 res_layer=4

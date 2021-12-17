@@ -52,9 +52,9 @@ class Visualize(object):
     def wandb_init(self, model):
         if not self._init:
             self._init = True
-            wandb.init(project="clip_simsiam",
+            wandb.init(project="video-simsiam",
                        entity="sapienzavideocontrastive",
-                       group="release",
+                       group="vfs",
                        config=self.args)
             wandb.watch(model)
 
